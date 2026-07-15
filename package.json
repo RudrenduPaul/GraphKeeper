@@ -1,0 +1,61 @@
+{
+  "name": "graphkeeper-cli",
+  "version": "0.1.0",
+  "description": "Local-only CLI that mines git history for file-level co-change patterns and builds a queryable knowledge graph for AI coding agents, with optional enrichment from graphify's symbol/call-graph output when it is installed.",
+  "keywords": [
+    "cli",
+    "knowledge-graph",
+    "git",
+    "co-change",
+    "code-intelligence",
+    "ai-agent",
+    "agent-native",
+    "graphify",
+    "local-first",
+    "developer-tools"
+  ],
+  "homepage": "https://github.com/RudrenduPaul/GraphKeeper#readme",
+  "bugs": {
+    "url": "https://github.com/RudrenduPaul/GraphKeeper/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RudrenduPaul/GraphKeeper.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Rudrendu Paul",
+  "type": "module",
+  "bin": {
+    "graphkeeper": "dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.eslint.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src test --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.3",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  }
+}
