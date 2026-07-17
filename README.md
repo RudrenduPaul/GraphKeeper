@@ -1,5 +1,8 @@
 # GraphKeeper
 
+[![PyPI version](https://img.shields.io/pypi/v/graphkeeper-cli.svg)](https://pypi.org/project/graphkeeper-cli/)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+
 A local-only CLI that mines your `git log` for which files actually change
 together, then hands an AI coding agent a queryable answer instead of a
 grep across the whole history.
@@ -27,13 +30,27 @@ byte of output comes from `git log` on the repo you already have checked out.
 
 ## Install
 
+GraphKeeper ships two independent, equally first-class packages -- pick
+whichever fits your toolchain, or install both. Both mine the same `git
+log` co-change signal and share one on-disk `.graphkeeper/graph.json`
+schema, so a store built by either can be read back by the other.
+
 ```bash
+# npm -- JavaScript/TypeScript CLI + library
 npm install -g graphkeeper-cli
 # or run it once with no install
 npx graphkeeper-cli build
+
+# PyPI -- Python CLI + library (genuine port, not a wrapper around the Node binary)
+pip install graphkeeper-cli
 ```
 
-Requires Node.js 18 or later and `git` on your `PATH`.
+The npm package requires Node.js 18 or later; the Python package requires
+Python 3.9 or later. Both require `git` on your `PATH`. The Python
+package's CLI entry point is also `graphkeeper` (e.g. `graphkeeper build`);
+see [`python/README.md`](./python/README.md) for the Python-specific
+walkthrough, and [CHANGELOG.md](./CHANGELOG.md) for each distribution's
+version history.
 
 ## Quickstart
 
@@ -260,7 +277,7 @@ already sitting on disk.
 
 ## Contributing
 
-Issues and PRs welcome. To build from source:
+Issues and PRs welcome. To build the TypeScript package from source:
 
 ```bash
 git clone https://github.com/RudrenduPaul/GraphKeeper.git
@@ -271,6 +288,10 @@ npm test
 npm run lint
 npm run typecheck
 ```
+
+For the Python package, see [`python/README.md`](./python/README.md). Full
+contribution guidelines covering both codebases are in
+[CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 
