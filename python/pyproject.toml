@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "graphkeeper-cli"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local-first CLI that mines git history for file-level co-change patterns and builds a queryable knowledge graph for AI coding agents, with optional enrichment from graphify's symbol/call-graph output when it is installed."
 readme = "README.md"
 requires-python = ">=3.9"

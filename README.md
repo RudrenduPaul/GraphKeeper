@@ -28,6 +28,8 @@ history -- co-change counts grow as a codebase accumulates more commits.)
 No server, no account, no embeddings API, nothing leaves your machine. Every
 byte of output comes from `git log` on the repo you already have checked out.
 
+![Installing graphkeeper-cli, cloning GraphKeeper, and running graphkeeper build followed by graphkeeper query co-change against its own repo](./docs/demo.gif)
+
 ## Install
 
 GraphKeeper ships two independent, equally first-class packages -- pick
@@ -141,6 +143,8 @@ graphkeeper query co-change src/git.ts --json
   ]
 }
 ```
+
+![Running graphkeeper query co-change with --json for a script-consumable answer, then graphkeeper query calls without graphify installed showing the graceful not-available explanation instead of a crash](./docs/usage.gif)
 
 ## CLI reference
 
@@ -274,6 +278,85 @@ already sitting on disk.
 - No telemetry, no network calls, no secrets. The only files GraphKeeper
   reads are `git log` output and (optionally) graphify's own `graph.json`;
   the only file it writes is `.graphkeeper/graph.json`.
+
+## FAQ
+
+**Is GraphKeeper a general codebase knowledge-graph indexer?**
+
+Not on its own. The package descriptions on npm and PyPI say it "builds a
+queryable knowledge graph," but what that means in practice is narrower:
+`graphkeeper build` mines `git log` for file-level co-change and writes
+those edges to `.graphkeeper/graph.json`. That file only becomes a
+symbol/call graph too if graphify is installed and gets merged in during
+the same build. Without graphify on `PATH`, the store holds co-change
+data only, and `graphkeeper query calls` says so directly instead of
+returning an empty result.
+
+**What does GraphKeeper actually give an agent that grep or git log don't?**
+
+A pre-computed, queryable answer to "which files change together here,"
+so an agent doesn't have to run its own `git log --name-only` scan and
+tally the results by hand on every question. `--json` on every command
+makes that answer script-consumable rather than something a human has to
+read and re-type.
+
+**How do I install it, and does it work on Windows?**
+
+`npm install -g graphkeeper-cli` (Node.js 18+) or `pip install
+graphkeeper-cli` (Python 3.9+); both need `git` on `PATH`. Neither
+package contains OS-specific branches or native bindings, and the PyPI
+listing is classified `Operating System :: OS Independent`, so it runs
+the same way on Windows, macOS, and Linux anywhere git and a supported
+Node or Python runtime are available.
+
+**How is this different from graphify, the tool it links to for enrichment?**
+
+They answer different questions. graphify extracts symbols, imports, and
+call graphs straight from source via tree-sitter, across 36 languages;
+GraphKeeper mines commit history for which files were historically
+edited together, a signal graphify has no reason to compute. GraphKeeper
+shells out to graphify's own local `extract` command when it's present
+and merges the result in, rather than reimplementing tree-sitter parsing
+from scratch. Neither replaces the other; see the comparison table above
+for how GitNexus, Greptile, and Augment Code differ from both.
+
+**What actually breaks GraphKeeper, or gives an empty result?**
+
+Two real cases, both documented, neither a crash: a shallow git clone
+(GitHub Actions' default `fetch-depth: 1`) has no history to mine, so
+`build` reports `0 commit(s) analyzed` and writes an empty co-change
+graph; full history (`fetch-depth: 0`) is required. Separately,
+`query calls` only returns results if the most recent `build` ran with
+graphify on `PATH` -- if it didn't, the command explains that plainly
+(`graphify was not found on PATH...`) instead of pretending the symbol
+doesn't exist.
+
+**Is it safe to run against a repo I don't fully trust?**
+
+Every `git` and `graphify` call goes through an argv array straight to
+the OS (`spawnSync` / Python's `subprocess.run` with a list, never a
+shell string), so filenames or commit messages can't be interpreted as
+shell syntax. Every `.graphkeeper/` write is checked against the
+resolved repo root, symlinks included, before it happens. There are no
+network calls anywhere in the tool, so nothing about the repo you point
+it at leaves your machine.
+
+**Is the npm CLI just a wrapper around the Python one, or vice versa?**
+
+Neither. They're two independent, from-scratch implementations (`src/`
+for TypeScript, `python/src/graphkeeper/` for Python) that happen to
+agree on the same `.graphkeeper/graph.json` schema, the same subcommands,
+flags, and exit codes. A store built by one can be read by the other.
+The Python port's own test suite (ported from the TypeScript vitest
+suite) is 78 tests, run against a real subprocess CLI invocation, not a
+mock of the other language's output.
+
+**What license is this under, and can I use it commercially?**
+
+Apache License 2.0, for both the npm and PyPI packages, with no dual
+licensing and no separate commercial tier. That permits commercial use,
+modification, and redistribution, with attribution and the standard
+Apache patent grant; see [LICENSE](./LICENSE) for the full text.
 
 ## Contributing
 
