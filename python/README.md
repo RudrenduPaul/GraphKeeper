@@ -35,15 +35,17 @@ uv add graphkeeper-cli
 ```
 
 Requires Python 3.9+ and `git` on your `PATH`. The complementary JS/TS
-distribution installs the same way on the npm side: `npm install -g
-graphkeeper-cli` (or `npx graphkeeper-cli build` to run it once without
-installing) -- see the
+distribution is also live on npm and installs the same way:
+
+```bash
+npm install -g graphkeeper-cli
+```
+
+or run it once without installing: `npx graphkeeper-cli build` -- see the
 [project README](https://github.com/RudrenduPaul/GraphKeeper#readme) for
-that package. Both are first-class and maintained together; neither is
-deprecated in favor of the other. As of this writing the npm package's own
-publish to the npm registry has not yet been attempted (a separate,
-unstarted task), but its source and this Python port are both complete and
-kept in parity.
+that package. Both distributions are first-class, published, and
+maintained together in behavioral parity; neither is a wrapper around the
+other and neither is deprecated in favor of the other.
 
 ## Quickstart
 
@@ -195,6 +197,26 @@ names (`commitsAnalyzed`, `coChange`, `fileCommitCounts`, etc.) as the npm
 package's store, so a `.graphkeeper/graph.json` written by either
 distribution can be read back by the other.
 
+## How it compares
+
+GraphKeeper mines `git log` for file-level co-change -- which files
+actually get edited together across a repo's real history -- and, when
+[graphify](https://github.com/Graphify-Labs/graphify) is on `PATH`,
+enriches that with graphify's own local symbol/call-graph extraction
+rather than reimplementing it. The full reasoning and a detailed
+comparison table (against graphify, GitNexus, Greptile, and Augment Code)
+live in the
+[project README's "Why this exists, and why it doesn't reimplement
+graphify" section](https://github.com/RudrenduPaul/GraphKeeper#why-this-exists-and-why-it-doesnt-reimplement-graphify).
+The short version:
+
+| Tool | What it does | Local-only? | Free/OSS? | GraphKeeper's relationship |
+|---|---|---|---|---|
+| [graphify](https://github.com/Graphify-Labs/graphify) | Symbol/import/call-graph extraction via tree-sitter, AI-assistant skill | Yes (code parsing) | Yes, MIT | GraphKeeper enriches from it when installed; doesn't reimplement it |
+| [GitNexus](https://github.com/abhigyanpatwari/GitNexus) | Browser/WASM knowledge graph + MCP tools, structural + call-flow analysis | Yes (runs client-side) | Yes, ISC | Different delivery model (browser app vs. CLI); no co-change mining |
+| [Greptile](https://www.greptile.com/) | Hosted AI code review with a graph-indexed codebase | No (hosted/enterprise) | No | Team/PR-review focused, not a local single-agent tool |
+| [Augment Code](https://www.augmentcode.com/) | Hosted coding assistant with its own code+docs+media knowledge graph | No (hosted) | No | Enterprise assistant platform, not a standalone local CLI |
+
 ## Security
 
 - Every `git` and `graphify` invocation uses an argv list passed directly
@@ -210,6 +232,53 @@ distribution can be read back by the other.
   `.graphkeeper/graph.json`.
 - See [SECURITY.md](https://github.com/RudrenduPaul/GraphKeeper/blob/main/SECURITY.md)
   for the private disclosure process.
+
+## FAQ
+
+**Is this Python package a wrapper around the npm CLI?**
+
+No. It's an independent, from-scratch implementation
+(`python/src/graphkeeper/`) that happens to agree with the TypeScript
+source (`src/`) on the same `.graphkeeper/graph.json` schema, subcommands,
+flags, and exit codes. A store built by one distribution can be read by
+the other, and the Python test suite (78 tests, ported from the
+TypeScript vitest suite) runs against a real subprocess CLI invocation,
+not a mock of the other language's output.
+
+**Do I need graphify installed for this to work?**
+
+No. `graphkeeper build` works fine without it, in co-change-only mode.
+If [graphify](https://github.com/Graphify-Labs/graphify) is detected on
+`PATH`, `build` also merges in its symbol/call-graph data; if it isn't,
+`graphkeeper query calls` explains exactly why the answer isn't available
+instead of crashing or returning an empty result.
+
+**How do I install it, and does it work on Windows?**
+
+`pip install graphkeeper-cli` (Python 3.9+) or `npm install -g
+graphkeeper-cli` (Node.js 18+); both need `git` on `PATH`. Neither
+package contains OS-specific branches or native bindings, and the PyPI
+listing is classified `Operating System :: OS Independent`, so it runs
+the same way on Windows, macOS, and Linux anywhere git and a supported
+Python or Node runtime are available.
+
+**What actually breaks GraphKeeper, or gives an empty result?**
+
+Two real cases, both documented, neither a crash: a shallow git clone
+(GitHub Actions' default `fetch-depth: 1`) has no history to mine, so
+`build` reports `0 commit(s) analyzed` and writes an empty co-change
+graph; full history (`fetch-depth: 0`) is required. Separately,
+`query calls` only returns results if the most recent `build` ran with
+graphify on `PATH`.
+
+**What license is this under, and can I use it commercially?**
+
+Apache License 2.0, for both the npm and PyPI packages, with no dual
+licensing and no separate commercial tier. That permits commercial use,
+modification, and redistribution, with attribution and the standard
+Apache patent grant; see
+[LICENSE](https://github.com/RudrenduPaul/GraphKeeper/blob/main/LICENSE)
+for the full text.
 
 ## Contributing
 
