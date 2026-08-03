@@ -212,8 +212,8 @@ The short version:
 
 | Tool | What it does | Local-only? | Free/OSS? | GraphKeeper's relationship |
 |---|---|---|---|---|
-| [graphify](https://github.com/Graphify-Labs/graphify) | Symbol/import/call-graph extraction via tree-sitter, AI-assistant skill | Yes (code parsing) | Yes, MIT | GraphKeeper enriches from it when installed; doesn't reimplement it |
-| [GitNexus](https://github.com/abhigyanpatwari/GitNexus) | Browser/WASM knowledge graph + MCP tools, structural + call-flow analysis | Yes (runs client-side) | Yes, ISC | Different delivery model (browser app vs. CLI); no co-change mining |
+| [graphify](https://github.com/Graphify-Labs/graphify) | Symbol/import/call-graph extraction via tree-sitter, AI-assistant skill | Yes (code parsing) | Yes, Apache-2.0 | GraphKeeper enriches from it when installed; doesn't reimplement it |
+| [GitNexus](https://github.com/abhigyanpatwari/GitNexus) | Browser/WASM knowledge graph + MCP tools, structural + call-flow analysis | Yes (runs client-side) | No, PolyForm Noncommercial 1.0.0 | Different delivery model (browser app vs. CLI); no co-change mining |
 | [Greptile](https://www.greptile.com/) | Hosted AI code review with a graph-indexed codebase | No (hosted/enterprise) | No | Team/PR-review focused, not a local single-agent tool |
 | [Augment Code](https://www.augmentcode.com/) | Hosted coding assistant with its own code+docs+media knowledge graph | No (hosted) | No | Enterprise assistant platform, not a standalone local CLI |
 
