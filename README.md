@@ -167,6 +167,8 @@ Called by (1):
 (Also real output, from running `graphkeeper build` against this repo with
 graphify installed.)
 
+![Running graphkeeper build with graphify installed, merging its symbol/call-graph into the same store, then graphkeeper query calls answering a call-graph question from the enriched store](./docs/graphify-enrichment.gif)
+
 Without graphify installed, that same command explains exactly why the
 answer isn't available instead of crashing or returning an empty result:
 
