@@ -2,14 +2,16 @@
 
 # GraphKeeper
 
-A local-only CLI that mines your `git log` for which files actually change
-together, then hands an AI coding agent a queryable answer instead of a
-grep across the whole history.
-
 [![npm version](https://img.shields.io/npm/v/graphkeeper-cli.svg)](https://www.npmjs.com/package/graphkeeper-cli)
 [![PyPI version](https://img.shields.io/pypi/v/graphkeeper-cli.svg)](https://pypi.org/project/graphkeeper-cli/)
 [![npm downloads](https://img.shields.io/npm/dm/graphkeeper-cli.svg)](https://www.npmjs.com/package/graphkeeper-cli)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+
+[Install](#install) • [Quickstart](#quickstart) • [CLI Reference](#cli-reference) • [Comparison](#comparison) • [FAQ](#faq)
+
+A local-only CLI that mines your `git log` for which files actually change
+together, then hands an AI coding agent a queryable answer instead of a
+grep across the whole history.
 
 ![Installing graphkeeper-cli, cloning GraphKeeper, and running graphkeeper build followed by graphkeeper query co-change against its own repo](./docs/demo.gif)
 
@@ -59,53 +61,6 @@ package's CLI entry point is also `graphkeeper` (e.g. `graphkeeper build`).
 See [`python/README.md`](./python/README.md) for the Python-specific
 walkthrough, and [CHANGELOG.md](./CHANGELOG.md) for each distribution's
 version history.
-
-## Table of Contents
-
-- [Features](#features)
-- [Quickstart](#quickstart)
-- [CLI Reference](#cli-reference)
-- [Library API Reference](#library-api-reference)
-- [Comparison](#comparison)
-- [What Is GraphKeeper, and Why Does It Exist](#what-is-graphkeeper-and-why-does-it-exist)
-- [How It Works](#how-it-works)
-- [Security](#security)
-- [FAQ](#faq)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Features
-
-- **Mines real commit history, not a static snapshot.** `graphkeeper build`
-  runs `git log --no-merges --name-only` across the full history of the
-  repo and counts every file pair that changed together in the same
-  commit. There's no guessing at coupling from folder structure or import
-  statements alone; the answer comes from how the codebase actually got
-  edited over time.
-- **`--max-files-per-commit` protects the signal.** A single vendoring
-  commit or mass reformat that touches 400 files would otherwise pollute
-  every pair in that commit. The default cap (100 files) skips commits
-  above that threshold so real coupling doesn't drown in noise.
-- **Optional call-graph enrichment, never required.** When
-  [graphify](https://github.com/Graphify-Labs/graphify) is on `PATH`,
-  `graphkeeper build` shells out to its local `graphify extract
-  --code-only --no-cluster` and merges the resulting symbol/call edges into
-  the same store, unlocking `graphkeeper query calls`. Without graphify,
-  GraphKeeper still works in co-change-only mode and says so plainly
-  instead of failing.
-- **Every command has a `--json` mode.** `graphkeeper query co-change
-  <file> --json` and the equivalents return machine-readable output, so an
-  agent's calling code parses a real data structure instead of scraping
-  text.
-- **Two from-scratch implementations, one schema.** The npm package
-  (`src/`, TypeScript) and the PyPI package (`python/src/graphkeeper/`,
-  Python) are independent ports, not a wrapper of one around the other.
-  Both read and write the same `.graphkeeper/graph.json`, so a store built
-  with one CLI is queryable from the other.
-- **Every subprocess call uses an argv array, never a shell string.** Git
-  and graphify are both invoked through `spawnSync`/`subprocess.run` with
-  a list of arguments, so a crafted commit message or filename in the repo
-  being analyzed can't be interpreted as shell syntax.
 
 ## Quickstart
 
@@ -200,6 +155,39 @@ graphkeeper query co-change src/git.ts --json
 ```
 
 ![Running graphkeeper query co-change with --json for a script-consumable answer, then graphkeeper query calls without graphify installed showing the graceful not-available explanation instead of a crash](./docs/usage.gif)
+
+## Features
+
+- **Mines real commit history, not a static snapshot.** `graphkeeper build`
+  runs `git log --no-merges --name-only` across the full history of the
+  repo and counts every file pair that changed together in the same
+  commit. There's no guessing at coupling from folder structure or import
+  statements alone; the answer comes from how the codebase actually got
+  edited over time.
+- **`--max-files-per-commit` protects the signal.** A single vendoring
+  commit or mass reformat that touches 400 files would otherwise pollute
+  every pair in that commit. The default cap (100 files) skips commits
+  above that threshold so real coupling doesn't drown in noise.
+- **Optional call-graph enrichment, never required.** When
+  [graphify](https://github.com/Graphify-Labs/graphify) is on `PATH`,
+  `graphkeeper build` shells out to its local `graphify extract
+  --code-only --no-cluster` and merges the resulting symbol/call edges into
+  the same store, unlocking `graphkeeper query calls`. Without graphify,
+  GraphKeeper still works in co-change-only mode and says so plainly
+  instead of failing.
+- **Every command has a `--json` mode.** `graphkeeper query co-change
+  <file> --json` and the equivalents return machine-readable output, so an
+  agent's calling code parses a real data structure instead of scraping
+  text.
+- **Two from-scratch implementations, one schema.** The npm package
+  (`src/`, TypeScript) and the PyPI package (`python/src/graphkeeper/`,
+  Python) are independent ports, not a wrapper of one around the other.
+  Both read and write the same `.graphkeeper/graph.json`, so a store built
+  with one CLI is queryable from the other.
+- **Every subprocess call uses an argv array, never a shell string.** Git
+  and graphify are both invoked through `spawnSync`/`subprocess.run` with
+  a list of arguments, so a crafted commit message or filename in the repo
+  being analyzed can't be interpreted as shell syntax.
 
 ## CLI Reference
 
