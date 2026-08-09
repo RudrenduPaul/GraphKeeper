@@ -10,6 +10,8 @@ import sys
 
 import pytest
 
+from graphkeeper import __version__
+
 from .conftest import cleanup, commit_all, make_temp_git_repo, write_file
 
 
@@ -49,7 +51,7 @@ def test_help_lists_build_and_query_subcommands():
 def test_prints_version():
     stdout, _stderr, status = run_cli_process(["--version"])
     assert status == 0
-    assert stdout.strip() == "0.1.0"
+    assert stdout.strip() == __version__
 
 
 def test_exits_2_on_nonexistent_path():

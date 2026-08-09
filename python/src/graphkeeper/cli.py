@@ -17,6 +17,7 @@ import json
 import sys
 from typing import List, NoReturn, Optional
 
+from . import __version__ as VERSION
 from .build import build
 from .formatters import (
     format_build_json,
@@ -30,8 +31,6 @@ from .formatters import (
 from .query import query_calls, query_co_change
 from .store import read_store, resolve_repo_root
 from .types import BuildOptions
-
-VERSION = "0.1.0"
 
 
 def _report_error(err: Exception, as_json: bool) -> NoReturn:

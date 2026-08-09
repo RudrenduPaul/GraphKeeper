@@ -6,6 +6,18 @@ JS/TS) and the PyPI package (`graphkeeper-cli`, Python) -- since they mine
 the same co-change signal and share an on-disk store schema; entries note
 which distribution they apply to.
 
+## [Python 0.1.3] - 2026-08-08
+
+Bug fix. Both `graphkeeper/__init__.py`'s `__version__` and
+`graphkeeper/cli.py`'s separate `VERSION` constant were hardcoded to
+`"0.1.0"`, drifted from the real `pyproject.toml` version -- the
+installed/published package was 0.1.2, but `graphkeeper --version` still
+reported 0.1.0. `__version__` is now read live from the installed
+package's own metadata via
+`importlib.metadata.version("graphkeeper-cli")`, and `cli.py` imports
+that same value instead of keeping its own copy, matching how the npm
+CLI already derives its version from `package.json` at runtime.
+
 ## [Python 0.1.0] - 2026-07-16
 
 Initial public release of the Python port, published to PyPI as

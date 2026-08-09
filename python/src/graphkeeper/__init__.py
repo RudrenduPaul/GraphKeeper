@@ -21,6 +21,8 @@ thin argument-parsing wrapper over the same functions exported here, so
 anything scriptable from the command line is also usable directly from
 Python.
 """
+from importlib import metadata as _importlib_metadata
+
 from .build import build
 from .git import GitError, mine_co_change, unquote_git_path
 from .graphify import detect_graphify, run_graphify_enrichment
@@ -39,7 +41,19 @@ from .types import (
     GraphKeeperStore,
 )
 
-__version__ = "0.1.0"
+try:
+    # Read the version from the installed package's own metadata rather than
+    # a hand-maintained string here, which silently drifted from the real
+    # pyproject.toml version (this constant, and cli.py's separate VERSION
+    # constant, were still "0.1.0" while the package had shipped 0.1.2 on
+    # PyPI, so `graphkeeper --version` reported a stale, wrong version to
+    # every user and agent that checked it).
+    __version__ = _importlib_metadata.version("graphkeeper-cli")
+except _importlib_metadata.PackageNotFoundError:
+    # Not installed (e.g. running straight from a source checkout without
+    # `pip install -e .`) -- fall back to a clearly-labeled placeholder
+    # instead of a number that can silently go stale again.
+    __version__ = "0.0.0-dev"
 
 __all__ = [
     "build",
