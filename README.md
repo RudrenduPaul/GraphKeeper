@@ -11,6 +11,8 @@ grep across the whole history.
 [![npm downloads](https://img.shields.io/npm/dm/graphkeeper-cli.svg)](https://www.npmjs.com/package/graphkeeper-cli)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 
+![Installing graphkeeper-cli, cloning GraphKeeper, and running graphkeeper build followed by graphkeeper query co-change against its own repo](./docs/demo.gif)
+
 </div>
 
 ```bash
@@ -33,8 +35,6 @@ history. Co-change counts grow as a codebase accumulates more commits.)
 
 No server, no account, no embeddings API. Every byte of output comes from
 `git log` on the repo you already have checked out.
-
-![Installing graphkeeper-cli, cloning GraphKeeper, and running graphkeeper build followed by graphkeeper query co-change against its own repo](./docs/demo.gif)
 
 ## Install
 
