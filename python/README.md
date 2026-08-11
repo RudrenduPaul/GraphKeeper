@@ -1,3 +1,5 @@
+<!-- mcp-name: io.github.RudrenduPaul/graphkeeper -->
+
 # graphkeeper-cli (Python)
 
 A local-only CLI and library that mines your `git log` for which files
