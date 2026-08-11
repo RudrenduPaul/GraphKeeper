@@ -2,6 +2,9 @@
 
 # GraphKeeper
 
+<!-- mcp-name: io.github.RudrenduPaul/graphkeeper -->
+<!-- Ownership-proof string for registry.modelcontextprotocol.io publishing. Do not remove. -->
+
 [![npm version](https://img.shields.io/npm/v/graphkeeper-cli.svg)](https://www.npmjs.com/package/graphkeeper-cli)
 [![PyPI version](https://img.shields.io/pypi/v/graphkeeper-cli.svg)](https://pypi.org/project/graphkeeper-cli/)
 [![npm downloads](https://img.shields.io/npm/dm/graphkeeper-cli.svg)](https://www.npmjs.com/package/graphkeeper-cli)
@@ -254,6 +257,42 @@ a crash or a silent empty result.
 
 Exit code `0` when the symbol is found, `1` when it isn't (or enrichment
 wasn't available), `2` on a usage or filesystem error.
+
+## MCP Server
+
+GraphKeeper ships a [Model Context Protocol](https://modelcontextprotocol.io) server so an AI
+coding agent (Claude, Cursor, or any MCP-compatible client) can mine co-change history and query
+the graph directly, without a human invoking the CLI by hand.
+
+Install the extra:
+
+```bash
+pip install "graphkeeper-cli[mcp]"
+```
+
+Add it to your MCP client's config (for Claude Desktop, `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "graphkeeper": {
+      "command": "uvx",
+      "args": ["--from", "graphkeeper-cli", "graphkeeper-mcp"]
+    }
+  }
+}
+```
+
+The server exposes one tool, `run`, that shells out to the published `graphkeeper` npm binary with
+the given subcommand and arguments plus `--json`, and returns the parsed JSON result:
+
+```
+run(["build", "."])
+run(["query", "co-change", "src/git.ts"])
+```
+
+Transport is stdio, so there is nothing to host: the MCP client spawns the server as a local
+subprocess. Source: [`python/src/graphkeeper/mcp_server.py`](python/src/graphkeeper/mcp_server.py).
 
 ## Library API Reference
 
