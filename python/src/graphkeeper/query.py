@@ -13,13 +13,48 @@ from typing import List, Optional
 from .types import CallsQueryResult, CoChangeQueryResult, CoChangeResultRow, GraphKeeperStore, GraphifyNode
 
 
+def _is_absolute(path_str: str) -> bool:
+    """Cross-platform absolute-path check matching the semantics of Node's
+    `path.isAbsolute`, which the TypeScript original (src/query.ts) relies
+    on.
+
+    On Windows, `os.path.isabs` disagrees with Node here for *root-relative*
+    paths that have no drive letter (e.g. "/repo/src/a.py" or
+    "\\repo\\src\\a.py"): Node's `path.isAbsolute` treats a leading path
+    separator as absolute (resolved against the current drive), but
+    `os.path.isabs` returns False for it, silently skipping relativization
+    for exactly the POSIX-style absolute paths an MCP client is likely to
+    pass. On POSIX this matches `os.path.isabs` exactly (leading "/").
+    """
+    if not path_str:
+        return False
+    if os.name == "nt":
+        first = path_str[0]
+        if first in ("\\", "/"):
+            return True
+        if len(path_str) > 2 and path_str[1] == ":" and path_str[2] in ("\\", "/"):
+            return True
+        return False
+    return path_str.startswith("/")
+
+
 def normalize_file_arg(store: GraphKeeperStore, file: str) -> str:
     """Normalizes a user-supplied file argument to the repo-relative form
     GraphKeeper stores paths in."""
     normalized = file
-    if os.path.isabs(normalized):
-        rel = os.path.relpath(normalized, store.repo_path)
-        if not rel.startswith(".."):
+    if _is_absolute(normalized):
+        try:
+            rel = os.path.relpath(normalized, store.repo_path)
+        except ValueError:
+            # Windows-only: os.path.relpath raises when `normalized` and
+            # `store.repo_path` are on different drives (e.g. repo on C:,
+            # file arg on D:) -- there is no relative path between them.
+            # The TypeScript original (path.relative) doesn't throw in this
+            # case; it just returns the absolute target path unchanged,
+            # which also fails the `not rel.startswith("..")` check below.
+            # Mirror that by leaving `normalized` as-is instead of crashing.
+            rel = None
+        if rel is not None and not rel.startswith(".."):
             normalized = rel
     normalized = re.sub(r"^\./", "", normalized)
     return normalized.replace(os.sep, "/")

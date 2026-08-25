@@ -283,8 +283,9 @@ Add it to your MCP client's config (for Claude Desktop, `claude_desktop_config.j
 }
 ```
 
-The server exposes one tool, `run`, that shells out to the published `graphkeeper` npm binary with
-the given subcommand and arguments plus `--json`, and returns the parsed JSON result:
+The server exposes one tool, `run`, that shells out to the published `graphkeeper-cli` npm package
+(via `npx graphkeeper-cli`) with the given subcommand and arguments plus `--json`, and returns the
+parsed JSON result:
 
 ```
 run(["build", "."])

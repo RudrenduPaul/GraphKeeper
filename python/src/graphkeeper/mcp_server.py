@@ -6,13 +6,20 @@ Generic MCP server template described in strategy-b2a-ideas/gtm/mcp-plugins.md
 underlying CLI with --json appended, parses the JSON stdout, and returns it
 as the tool result.
 
-Deliberately shells out to the Node/TypeScript CLI (`npx graphkeeper`)
+Deliberately shells out to the Node/TypeScript CLI (`npx graphkeeper-cli`)
 rather than calling into this same Python package's own native
 `graphkeeper.cli` module. Per the template, the MCP wrapper's implementation
 language is independent of the CLI's: this keeps one wrapper shape reusable
 across the whole portfolio regardless of whether a given repo's CLI is Node
-or Python, and it exercises the actual published `graphkeeper` npm binary
-end to end rather than a parallel code path.
+or Python, and it exercises the actual published `graphkeeper-cli` npm
+package end to end rather than a parallel code path.
+
+NOTE ON THE PACKAGE NAME: the published npm package is `graphkeeper-cli`
+(https://www.npmjs.com/package/graphkeeper-cli), not `graphkeeper`. A
+completely unrelated, unaudited third-party package is published under the
+bare name `graphkeeper` by a different maintainer -- `npx graphkeeper`
+would silently install and run that package instead of this project's CLI
+(a dependency-confusion trap). Always use the `-cli` suffix here.
 
 stdout is reserved for MCP's JSON-RPC framing, so anything this module
 logs goes to stderr.
@@ -27,17 +34,23 @@ from typing import Any
 
 from mcp.server import MCPServer
 
-# Local-test override: point at a built dist/cli.js instead of `npx graphkeeper`.
+# Local-test override: point at a built dist/cli.js instead of `npx graphkeeper-cli`.
 # The npm package may not be globally linked on a dev machine, so testing
 # this wrapper against a repo checkout needs a direct `node <path>` command.
-# Production default (no env var set) is `npx graphkeeper`.
+# Production default (no env var set) is `npx graphkeeper-cli`.
+#
+# IMPORTANT: the published npm package name is `graphkeeper-cli`, NOT
+# `graphkeeper`. `graphkeeper` (no suffix) is an unrelated third-party
+# package from a different publisher -- using the bare name here would be a
+# dependency-confusion bug, silently running someone else's code instead of
+# this project's CLI. Do not drop the `-cli` suffix.
 _LOCAL_CLI_JS = os.environ.get("GRAPHKEEPER_CLI_JS")
 
 
 def _base_command() -> list[str]:
     if _LOCAL_CLI_JS:
         return ["node", _LOCAL_CLI_JS]
-    return ["npx", "graphkeeper"]
+    return ["npx", "graphkeeper-cli"]
 
 
 _TOOL_DESCRIPTION = """Run the GraphKeeper CLI to mine a local git repo's commit history for file-level co-change patterns and query the resulting knowledge graph. Call this when an agent needs to know which files tend to change together in a codebase (e.g. before editing a file, to see what else usually needs to change alongside it) or which functions call/are called by a given symbol.

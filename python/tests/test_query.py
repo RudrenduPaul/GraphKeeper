@@ -1,10 +1,12 @@
 """Ported from test/query.test.ts."""
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 from typing import Optional
+from unittest.mock import patch
 
-from graphkeeper.query import find_graphify_node, normalize_file_arg, query_calls, query_co_change
+from graphkeeper.query import _is_absolute, find_graphify_node, normalize_file_arg, query_calls, query_co_change
 from graphkeeper.types import CoChangeEdge, GraphifyEnrichment, GraphKeeperStore
 
 
@@ -37,6 +39,40 @@ class TestNormalizeFileArg:
 
     def test_leaves_absolute_path_outside_repo_path_unchanged(self):
         assert normalize_file_arg(_make_store(repo_path="/repo"), "/other/src/a.py") == "/other/src/a.py"
+
+    def test_does_not_crash_when_relpath_cannot_compute_a_relative_path(self):
+        # Windows-only in practice: os.path.relpath raises ValueError when
+        # the two paths are on different drives (e.g. repo on C:, file arg
+        # on D:), since there is no relative path between them. The
+        # TypeScript original (path.relative) doesn't throw in that case --
+        # it just returns the absolute target path unchanged. Force
+        # `_is_absolute` and mock os.path.relpath so this regression test
+        # exercises that branch on every platform, not just Windows, and
+        # use forward slashes throughout so the os.sep normalization at the
+        # end of the function is a no-op regardless of host OS.
+        with patch("graphkeeper.query._is_absolute", return_value=True), patch.object(
+            os.path, "relpath", side_effect=ValueError("path is on mount 'D:', start on mount 'C:'")
+        ):
+            result = normalize_file_arg(_make_store(repo_path="C:/repo"), "D:/other/file.py")
+        assert result == "D:/other/file.py"
+
+
+class TestIsAbsolute:
+    """`_is_absolute` exists because `os.path.isabs` disagrees with Node's
+    `path.isAbsolute` (which the TS original uses) on Windows for
+    root-relative paths with no drive letter -- e.g. `os.path.isabs`
+    returns False for "/repo/src/a.py" on Windows, so the un-fixed Python
+    port silently skipped relativizing exactly this kind of path."""
+
+    def test_posix_style_root_relative_path_is_absolute(self):
+        assert _is_absolute("/repo/src/a.py") is True
+
+    def test_relative_path_is_not_absolute(self):
+        assert _is_absolute("src/a.py") is False
+        assert _is_absolute("./src/a.py") is False
+
+    def test_empty_string_is_not_absolute(self):
+        assert _is_absolute("") is False
 
 
 class TestQueryCoChange:
