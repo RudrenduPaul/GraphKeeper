@@ -6,6 +6,20 @@ JS/TS) and the PyPI package (`graphkeeper-cli`, Python) -- since they mine
 the same co-change signal and share an on-disk store schema; entries note
 which distribution they apply to.
 
+## [0.2.0] - 2026-09-24 (npm)
+
+### Changed
+
+- Runtime dependency `commander` upgraded from `^12.1.0` to `^13.1.0`. The
+  supported Node floor is unchanged (`>=18`).
+- Development dependencies upgraded (TypeScript 6, ESLint 10 with a flat
+  config, typescript-eslint 8, `@types/node` 26). No change to shipped
+  behavior.
+- npm releases are now published through npm Trusted Publishing (GitHub
+  Actions OIDC, no long-lived token) from `.github/workflows/publish-npm.yml`.
+
+The Python distribution is unchanged by this release.
+
 ## [Python 0.1.3] - 2026-08-08
 
 Bug fix. Both `graphkeeper/__init__.py`'s `__version__` and
